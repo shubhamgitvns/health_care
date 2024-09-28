@@ -11,6 +11,7 @@ class HealthAdviserApp extends StatelessWidget {
       title: 'Health Adviser App',
       theme: ThemeData(
         primarySwatch: Colors.green,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: IntroPage(),
     );
@@ -22,91 +23,105 @@ class IntroPage extends StatefulWidget {
   _IntroPageState createState() => _IntroPageState();
 }
 
-class _IntroPageState extends State<IntroPage> {
-  Color _backgroundColor = Colors.greenAccent;
-  double _opacity = 0.0;
+class _IntroPageState extends State<IntroPage> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animateIntro();
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _controller.forward();
   }
 
-  void _animateIntro() {
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _opacity = 1.0; // Fade in text
-      });
-    });
-    // Change background color after a delay
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _backgroundColor = Colors.blueAccent; // Change background color
-      });
-    });
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedContainer(
-        duration: Duration(seconds: 2),
-        color: _backgroundColor,
-        curve: Curves.easeInOut,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.greenAccent, Colors.blueAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Logo or Image
-                Container(
-                  height: 150,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green[200],
-                    image: DecorationImage(
-                      image: AssetImage('assets/logo.png'), // Change to your logo path
-                      fit: BoxFit.cover,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Logo/Image
+              Container(
+                height: 150,
+                width: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: Offset(0, 5),
                     ),
+                  ],
+                  image: DecorationImage(
+                    image: AssetImage('assets/logo.png'), // Change to your logo path
+                    fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(height: 20),
-                // App Name
-                AnimatedOpacity(
-                  opacity: _opacity,
-                  duration: Duration(seconds: 1),
+              ),
+              SizedBox(height: 30),
+              // App Name
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Text(
+                  'Health Adviser',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              SizedBox(height: 15),
+              // Introductory Text
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
                   child: Text(
-                    'Health Adviser',
+                    'Your personalized health advisor. Get tailored meal plans, workout routines, and health tips based on your profile.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontSize: 18,
+                      color: Colors.white70,
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
-                // Introductory Text
-                AnimatedOpacity(
-                  opacity: _opacity,
-                  duration: Duration(seconds: 1),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text(
-                      'Your personalized health advisor. Get tailored meal plans, workout routines, and health tips based on your profile.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 30),
-                // Start Button
-                ElevatedButton(
+              ),
+              SizedBox(height: 40),
+              // Start Button
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: ElevatedButton(
                   onPressed: () {
                     // Navigate to the next page (e.g., input page)
                     Navigator.push(
@@ -116,11 +131,16 @@ class _IntroPageState extends State<IntroPage> {
                   },
                   child: Text('Get Started'),
                   style: ElevatedButton.styleFrom(
-
+                    // primary: Colors.white,
+                    // onPrimary: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
