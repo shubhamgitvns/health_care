@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(HealthAdviserApp());
@@ -11,7 +12,6 @@ class HealthAdviserApp extends StatelessWidget {
       title: 'Health Adviser App',
       theme: ThemeData(
         primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: IntroPage(),
     );
@@ -23,33 +23,22 @@ class IntroPage extends StatefulWidget {
   _IntroPageState createState() => _IntroPageState();
 }
 
-class _IntroPageState extends State<IntroPage> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+class _IntroPageState extends State<IntroPage> {
+  int _currentWordIndex = 0;
+  final List<String> _appNameWords = [
+    'Health',
+    'Adviser',
+  ];
 
   @override
   void initState() {
     super.initState();
-
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
-
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    // Start a timer to change the word every 1 second
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _currentWordIndex = (_currentWordIndex + 1) % _appNameWords.length;
+      });
+    });
   }
 
   @override
@@ -58,7 +47,10 @@ class _IntroPageState extends State<IntroPage> with SingleTickerProviderStateMix
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.greenAccent, Colors.blueAccent],
+            colors: [
+              Colors.greenAccent, // First color
+              Colors.blueAccent,   // Second color
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -68,75 +60,45 @@ class _IntroPageState extends State<IntroPage> with SingleTickerProviderStateMix
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo/Image
-              Container(
-                height: 150,
-                width: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+              // App Name that changes word by word
+              Text(
+                _appNameWords[_currentWordIndex],
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10.0,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                  image: DecorationImage(
-                    image: AssetImage('assets/logo.png'), // Change to your logo path
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
               SizedBox(height: 30),
-              // App Name
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Text(
-                  'Health Adviser',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
               // Introductory Text
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Text(
-                    'Your personalized health advisor. Get tailored meal plans, workout routines, and health tips based on your profile.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white70,
-                    ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  'Your personalized health advisor. Get tailored meal plans, workout routines, and health tips based on your profile.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white70,
                   ),
                 ),
               ),
               SizedBox(height: 40),
               // Start Button
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to the next page (e.g., input page)
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
-                    );
-                  },
-                  child: Text('Get Started'),
-                  style: ElevatedButton.styleFrom(
-                    // primary: Colors.white,
-                    // onPrimary: Colors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to the next page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                },
+                child: Text('Get Started'),
+                style: ElevatedButton.styleFrom(
+                  //primary: Colors.white,
+                  //onPrimary: Colors.green,
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
               ),
