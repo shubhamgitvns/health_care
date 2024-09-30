@@ -25,18 +25,33 @@ class IntroPage extends StatefulWidget {
 
 class _IntroPageState extends State<IntroPage> {
   int _currentWordIndex = 0;
+  int _colorIndex = 0;
   final List<String> _appNameWords = [
     'Health',
     'Adviser',
   ];
 
+  final List<List<Color>> _backgroundColors = [
+    [Colors.purple, Colors.deepOrangeAccent],
+    [Colors.teal, Colors.cyanAccent],
+    [Colors.blueGrey, Colors.lime],
+    [Colors.indigo, Colors.pinkAccent],
+  ];
+
   @override
   void initState() {
     super.initState();
-    // Start a timer to change the word every 1 second
+    // Timer to change the words
     Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         _currentWordIndex = (_currentWordIndex + 1) % _appNameWords.length;
+      });
+    });
+
+    // Timer to change the background color every 3 seconds
+    Timer.periodic(Duration(seconds: 3), (timer) {
+      setState(() {
+        _colorIndex = (_colorIndex + 1) % _backgroundColors.length;
       });
     });
   }
@@ -44,13 +59,11 @@ class _IntroPageState extends State<IntroPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: AnimatedContainer(
+        duration: Duration(seconds: 2),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.greenAccent, // First color
-              Colors.blueAccent,   // Second color
-            ],
+            colors: _backgroundColors[_colorIndex],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -94,8 +107,8 @@ class _IntroPageState extends State<IntroPage> {
                 },
                 child: Text('Get Started'),
                 style: ElevatedButton.styleFrom(
-                  //primary: Colors.white,
-                  //onPrimary: Colors.green,
+                 // primary: Colors.white,
+                 // onPrimary: Colors.green,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
